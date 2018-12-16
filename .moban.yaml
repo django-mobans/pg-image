@@ -1,0 +1,38 @@
+image:
+  name: django-mobans-pg-image
+  version: 0.1
+  maintainer: jayvdb@gmail.com
+  parent: postgres:10-alpine
+  inherit:
+    cmd: true
+    entrypoint: true
+    expose: true
+  apk:
+    - bash
+  copy:
+    - docker-healthcheck: /usr/local/bin/
+  healthcheck:
+    interval: 5m
+    timeout: 15s
+    start_period: 30s
+    cmd: 'docker-healthcheck || exit 1'
+
+requires:
+  - https://github.com/docker-library/healthcheck
+
+configuration:
+  configuration: .moban.yaml
+  template_dir:
+    - 'healthcheck:'
+    - ../docker-mobans/.moban.dt/
+  configuration_dir: .
+targets:
+  - Dockerfile: Dockerfile.jj2
+  - .dockerfile_lint_rules.yaml: dockerfile_lint_rules.yaml.jj2
+  - .gitlab-ci.yml: gitlab-ci.yml.jj2
+  - .travis.yml: travis.yml.jj2
+copy:
+  - .coafile: .coafile
+  - .gitignore: .gitignore
+  - docker-healthcheck: postgres/docker-healthcheck
+  - hooks/build: hooks/build
