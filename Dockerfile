@@ -1,3 +1,5 @@
+# Equivalent of cookiecutter-django file compose/production/postgres/Dockerfile using postgres 10 but using alpine as the base.
+
 FROM postgres:10-alpine
 
 LABEL name=django-mobans-pg-image \
@@ -8,6 +10,10 @@ RUN apk add --no-cache \
   bash
 
 COPY docker-healthcheck /usr/local/bin/
+
+COPY maintenance/* /usr/local/bin/
+
+RUN chmod a+x /usr/local/bin/*
 
 HEALTHCHECK --interval=5m \
             --timeout=15s \
