@@ -3,14 +3,27 @@ image:
   version: 0.1
   maintainer: jayvdb@gmail.com
   parent: postgres:10-alpine
+  comment:
+    Equivalent of cookiecutter-django file
+    compose/production/postgres/Dockerfile
+    using postgres 10 but using alpine as the base.
   inherit:
     cmd: true
     entrypoint: true
     expose: true
   apk:
     - bash
+  set_executable_on_copy: true
   copy:
     - docker-healthcheck: /usr/local/bin/
+    - command-entrypoint.sh: /usr/local/bin/
+    - maintenance/backup: /usr/local/bin/
+    - maintenance/restore: /usr/local/bin/
+    - maintenance/backups: /usr/local/bin/
+    - maintenance/_sourced/constants.sh: /usr/local/bin/_sourced/
+    - maintenance/_sourced/countdown.sh: /usr/local/bin/_sourced/
+    - maintenance/_sourced/messages.sh: /usr/local/bin/_sourced/
+    - maintenance/_sourced/yes_no.sh: /usr/local/bin/_sourced/
   healthcheck:
     interval: 5m
     timeout: 15s
@@ -19,12 +32,14 @@ image:
 
 requires:
   - https://github.com/docker-library/healthcheck
+  - https://github.com/pydanny/cookiecutter-django
 
 configuration:
   configuration: .moban.yaml
   template_dir:
     - 'healthcheck:'
     - ../docker-mobans/.moban.dt/
+    - 'cookiecutter-django:'
   configuration_dir: .
 targets:
   - Dockerfile: Dockerfile.jj2
@@ -35,4 +50,5 @@ copy:
   - .coafile: .coafile
   - .gitignore: .gitignore
   - docker-healthcheck: postgres/docker-healthcheck
+  - maintenance: '{{cookiecutter.project_slug}}/compose/production/postgres/maintenance/**'
   - hooks/build: hooks/build
